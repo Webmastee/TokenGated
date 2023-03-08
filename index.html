@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Gated</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+</head>
+<body>
+  <p>Wallet Address - <span id="wallet-address"></span></p>
+  <button id="reveal">Show secret</button>
+  <button id="connect">connect</button>
+  <p>Secret Message - <span id="secret"></span></p>
+  
+  <script type="text/javascript">
+    //connecting metamask to site, get tyhe users address
+
+    var account = null;
+
+    const connect = async () => {
+        if(window.ethereum) {
+            await window.ethereum.send('eth_requestAccounts');
+            window.web3 = new Web3(window.ethereum);
+
+            //getting the balance of the accounts 
+
+            var accounts = await web3.eth.getAccounts();
+            account = accounts[0];
+            document.getElementById('wallet-address').textContent = account;
+
+            document.getElementById('reveal').onclick = revealMsg;
+
+        }
+    }
+
+    const revealMsg = async () => {
+        //making users to sign in message once it send it
+
+        var signature = await web3.eth.personal.sign('Message to sign', account);
+
+        var res = await fetch('/secret?signature=' + signature);
+        var body = await res.text();
+
+        document.getElementById('secret').textContent = body
+    }
+    document.getElementById('connect').onclick = connect;
+  </script>
+</body>
+</html>
